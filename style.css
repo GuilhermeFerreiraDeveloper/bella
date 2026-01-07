@@ -1,0 +1,129 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: #1a1a1a; /* Cor de fundo caso a imagem não carregue */
+    color: #f2f2f2;
+}
+
+header {
+    text-align: center;
+    padding: 20px 0;
+    background-color: #000;
+    border-bottom: 5px solid #c00;
+}
+
+.logo {
+    max-width: 250px;
+}
+
+main {
+    padding: 20px;
+}
+
+#menu {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: rgba(43, 43, 43, 0.9); /* Fundo do menu com leve transparência */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#menu h2, #contact h2 {
+    font-family: 'Lobster', cursive;
+    color: #ffc107; /* Amarelo da pizza */
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 30px;
+}
+
+.menu-category {
+    margin-bottom: 30px;
+}
+
+.menu-category h3 {
+    color: #fff;
+    border-bottom: 2px solid #c00; /* Vermelho do logo */
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+}
+
+.menu-category ul {
+    list-style: none;
+    padding: 0;
+}
+
+.menu-category li {
+    padding: 12px 0;
+    font-size: 1.1em;
+    border-bottom: 1px dashed #555;
+    line-height: 1.5;
+}
+
+.menu-category li strong {
+    color: #ffc107; /* Amarelo da pizza */
+}
+
+.menu-category li:last-child {
+    border-bottom: none;
+}
+
+#contact {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: rgba(43, 43, 43, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+#contact p {
+    font-size: 1.2em;
+    line-height: 1.6;
+}
+
+#contact a {
+    color: #ffc107; /* Amarelo da pizza */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#contact a:hover {
+    text-decoration: underline;
+}
+
+#location {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: rgba(43, 43, 43, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+#location h2 {
+    color: #ffc107;
+}
+
+#location iframe {
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background-color: #000;
+    color: #777;
+    border-top: 3px solid #006400; /* Verde do logo */
+}
