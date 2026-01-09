@@ -21,6 +21,35 @@ header {
     max-width: 250px;
 }
 
+#tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background-color: rgba(0,0,0,0.6);
+    border-bottom: 2px solid #c00;
+}
+
+.tab-btn {
+    background-color: #2b2b2b;
+    color: #f2f2f2;
+    border: 1px solid #555;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.tab-btn.active {
+    background-color: #ffc107;
+    color: #000;
+    border-color: #ffc107;
+}
+
+.tab-btn:hover {
+    filter: brightness(1.1);
+}
+
 main {
     padding: 20px;
 }
@@ -42,8 +71,190 @@ main {
     margin-bottom: 30px;
 }
 
+.form-group {
+    margin-bottom: 20px;
+}
+
+.group-label {
+    display: block;
+    color: #ffc107;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.size-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #333;
+    border: 1px solid #555;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #f2f2f2;
+    cursor: pointer;
+}
+
+.flavors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #333;
+    border: 1px solid #555;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: #f2f2f2;
+}
+
+input[type="text"], input[type="tel"] {
+    width: 100%;
+    background-color: #2b2b2b;
+    border: 1px solid #555;
+    color: #f2f2f2;
+    padding: 12px;
+    border-radius: 8px;
+    outline: none;
+}
+
+.note-input {
+    width: 70%;
+    max-width: 420px;
+}
+
+.btn-primary {
+    background-color: #c00;
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.btn-primary:hover {
+    background-color: #a00;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    filter: brightness(0.95);
+}
+
+.btn-danger {
+    background-color: #c00;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.order-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px 0 20px;
+}
+
+.pizza-card {
+    background-color: rgba(43, 43, 43, 0.9);
+    border: 1px solid #555;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.chip {
+    background-color: #333;
+    color: #ffc107;
+    border: 1px solid #ffc107;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.9em;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background-color: rgba(43, 43, 43, 0.98);
+    border: 2px solid #c00;
+    border-radius: 10px;
+    padding: 20px;
+    width: min(680px, 90vw);
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+.modal-content h3 {
+    color: #ffc107;
+    font-family: 'Lobster', cursive;
+    margin-top: 0;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+}
+
 .menu-category {
     margin-bottom: 30px;
+}
+
+.menu-subtitle {
+    color: #ffc107;
+    font-family: 'Lobster', cursive;
+    font-size: 1.8em;
+    margin: 10px 0 20px;
+    text-align: center;
 }
 
 .menu-category h3 {
@@ -97,6 +308,23 @@ main {
 
 #contact a:hover {
     text-decoration: underline;
+}
+
+#order {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: rgba(43, 43, 43, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+#order h2, #location h2 {
+    color: #ffc107;
+    font-family: 'Lobster', cursive;
+    text-align: center;
+    font-size: 2.2em;
+    margin-bottom: 25px;
 }
 
 #location {

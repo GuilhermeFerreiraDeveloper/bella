@@ -12,9 +12,17 @@
         <img src="logo.png" alt="Bella Pizza Logo" class="logo">
     </header>
 
+    <nav id="tabs">
+        <button class="tab-btn active" data-target="menu">Cardápio</button>
+        <button class="tab-btn" data-target="order">Faça seu Pedido</button>
+        <button class="tab-btn" data-target="contact">Contato</button>
+        <button class="tab-btn" data-target="location">Onde estamos</button>
+    </nav>
+
     <main>
         <section id="menu">
             <h2>Nosso Cardápio</h2>
+            <h3 class="menu-subtitle">Pizzas Salgadas</h3>
 
             <div class="menu-category">
                 <h3>Pizzas - P: R$ 30,90 | G: R$ 38,90</h3>
@@ -84,7 +92,74 @@
                     </li>
                 </ul>
             </div>
+
+            <h3 class="menu-subtitle">Pizzas Doces</h3>
+            <div class="menu-category">
+                <h3>Pizzas Doces - P: R$ 33,90 | G: R$ 46,90</h3>
+                <ul>
+                    <li>
+                        <strong>Banana Nevada:</strong> mussarela, banana, chocolate branco e canela.
+                    </li>
+                    <li>
+                        <strong>Kit Kat:</strong> chocolate e Kit Kat.
+                    </li>
+                    <li>
+                        <strong>Morango:</strong> chocolate e morango.
+                    </li>
+                    <li>
+                        <strong>Uva:</strong> chocolate e uva.
+                    </li>
+                    <li>
+                        <strong>Sonho de Valsa:</strong> chocolate e Sonho de Valsa.
+                    </li>
+                </ul>
+            </div>
+
+            <div class="menu-category">
+                <h3>Pizzas Doces - P: R$ 32,90 | G: R$ 43,90</h3>
+                <ul>
+                    <li>
+                        <strong>Brigadeiro:</strong> chocolate e granulado.
+                    </li>
+                    <li>
+                        <strong>Choconana:</strong> chocolate e banana.
+                    </li>
+                    <li>
+                        <strong>Confete:</strong> chocolate e confete.
+                    </li>
+                </ul>
+            </div>
         </section>
+
+        <section id="order">
+            <h2>Monte seu Pedido</h2>
+            <form id="order-form">
+                <div id="pizzas-list"></div>
+                <div class="order-actions">
+                    <button type="button" id="add-pizza" class="btn-secondary">Adicionar pizza</button>
+                </div>
+                <div class="form-group">
+                    <label for="address" class="group-label">Endereço de Entrega</label>
+                    <input id="address" type="text" placeholder="Rua, número, bairro" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone" class="group-label">Telefone de contato</label>
+                    <input id="phone" type="tel" placeholder="(DDD) 9XXXX-XXXX" required>
+                </div>
+                <button type="button" id="send-order" class="btn-primary">Enviar Pedido</button>
+            </form>
+        </section>
+
+        <div id="flavor-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-content">
+                <h3>Escolha até 2 sabores</h3>
+                <div id="modal-flavors" class="flavors-grid"></div>
+                <div class="modal-actions">
+                    <button type="button" id="modal-save" class="btn-primary">Salvar</button>
+                    <button type="button" id="modal-cancel" class="btn-secondary">Cancelar</button>
+                </div>
+            </div>
+        </div>
 
         <section id="contact">
             <h2>Peça já a sua!</h2>
@@ -102,5 +177,260 @@
     <footer>
         <p>&copy; 2026 Bella Pizza. Todos os direitos reservados.</p>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tabButtons = document.querySelectorAll('#tabs .tab-btn');
+            var sectionIds = ['menu', 'order', 'contact', 'location'];
+            function showSection(id) {
+                for (var s = 0; s < sectionIds.length; s++) {
+                    var el = document.getElementById(sectionIds[s]);
+                    if (el) el.style.display = sectionIds[s] === id ? '' : 'none';
+                }
+            }
+            function setActive(btn) {
+                for (var b = 0; b < tabButtons.length; b++) {
+                    tabButtons[b].classList.remove('active');
+                }
+                btn.classList.add('active');
+            }
+            for (var tb = 0; tb < tabButtons.length; tb++) {
+                tabButtons[tb].addEventListener('click', function (e) {
+                    var target = e.currentTarget.getAttribute('data-target');
+                    setActive(e.currentTarget);
+                    showSection(target);
+                });
+            }
+            showSection('menu');
+
+            var flavorNodes = document.querySelectorAll('#menu .menu-category ul li strong');
+            var flavorNames = [];
+            for (var i = 0; i < flavorNodes.length; i++) {
+                var n = flavorNodes[i].textContent.trim().replace(/:$/, '');
+                if (flavorNames.indexOf(n) === -1) flavorNames.push(n);
+            }
+            var pizzasState = {};
+            var pizzaCounter = 0;
+            function createPizzaCard(id) {
+                var card = document.createElement('div');
+                card.className = 'pizza-card';
+                card.setAttribute('data-pizza-id', id);
+                var sizeGroup = document.createElement('div');
+                sizeGroup.className = 'form-group';
+                var lblSize = document.createElement('label');
+                lblSize.className = 'group-label';
+                lblSize.textContent = 'Tamanho';
+                var sizeOpts = document.createElement('div');
+                sizeOpts.className = 'size-options';
+                var l1 = document.createElement('label');
+                l1.className = 'radio';
+                var r1 = document.createElement('input');
+                r1.type = 'radio';
+                r1.name = 'size-' + id;
+                r1.value = 'P';
+                var s1 = document.createElement('span');
+                s1.textContent = 'P';
+                l1.appendChild(r1); l1.appendChild(s1);
+                var l2 = document.createElement('label');
+                l2.className = 'radio';
+                var r2 = document.createElement('input');
+                r2.type = 'radio';
+                r2.name = 'size-' + id;
+                r2.value = 'G';
+                var s2 = document.createElement('span');
+                s2.textContent = 'G';
+                l2.appendChild(r2); l2.appendChild(s2);
+                sizeOpts.appendChild(l1); sizeOpts.appendChild(l2);
+                sizeGroup.appendChild(lblSize); sizeGroup.appendChild(sizeOpts);
+                var flavorsGroup = document.createElement('div');
+                flavorsGroup.className = 'form-group';
+                var lblFlavors = document.createElement('label');
+                lblFlavors.className = 'group-label';
+                lblFlavors.textContent = 'Sabores (máximo 2)';
+                var chips = document.createElement('div');
+                chips.className = 'chips';
+                chips.textContent = 'Nenhum sabor selecionado';
+                var btnPick = document.createElement('button');
+                btnPick.type = 'button';
+                btnPick.className = 'btn-secondary';
+                btnPick.textContent = 'Escolher sabores';
+                btnPick.addEventListener('click', function () {
+                    openFlavorModal(id);
+                });
+                var btnRemove = document.createElement('button');
+                btnRemove.type = 'button';
+                btnRemove.className = 'btn-danger';
+                btnRemove.textContent = 'Remover pizza';
+                btnRemove.addEventListener('click', function () {
+                    var list = document.getElementById('pizzas-list');
+                    if (list.children.length > 1) {
+                        delete pizzasState[id];
+                        list.removeChild(card);
+                    } else {
+                        alert('Mantenha pelo menos uma pizza.');
+                    }
+                });
+                flavorsGroup.appendChild(lblFlavors);
+                flavorsGroup.appendChild(chips);
+                flavorsGroup.appendChild(btnPick);
+                flavorsGroup.appendChild(btnRemove);
+                card.appendChild(sizeGroup);
+                card.appendChild(flavorsGroup);
+                var noteGroup = document.createElement('div');
+                noteGroup.className = 'form-group';
+                var lblNote = document.createElement('label');
+                lblNote.className = 'group-label';
+                lblNote.textContent = 'Observação (opcional)';
+                var noteInput = document.createElement('input');
+                noteInput.type = 'text';
+                noteInput.placeholder = 'Ex.: sem milho';
+                noteInput.className = 'note-input';
+                noteInput.value = pizzasState[id] && pizzasState[id].note ? pizzasState[id].note : '';
+                noteInput.addEventListener('input', function (e) {
+                    pizzasState[id] = pizzasState[id] || {};
+                    pizzasState[id].note = e.target.value;
+                });
+                noteGroup.appendChild(lblNote);
+                noteGroup.appendChild(noteInput);
+                card.appendChild(noteGroup);
+                return card;
+            }
+            function updateChips(id) {
+                var card = document.querySelector('.pizza-card[data-pizza-id="' + id + '"]');
+                var chips = card.querySelector('.chips');
+                var selected = pizzasState[id] && pizzasState[id].flavors ? pizzasState[id].flavors : [];
+                chips.innerHTML = '';
+                if (!selected.length) {
+                    chips.textContent = 'Nenhum sabor selecionado';
+                    return;
+                }
+                for (var c = 0; c < selected.length; c++) {
+                    var chip = document.createElement('span');
+                    chip.className = 'chip';
+                    chip.textContent = selected[c];
+                    chips.appendChild(chip);
+                }
+            }
+            var pizzasList = document.getElementById('pizzas-list');
+            function addPizza() {
+                pizzaCounter += 1;
+                var id = 'pizza-' + pizzaCounter;
+                pizzasState[id] = { flavors: [], note: '' };
+                var card = createPizzaCard(id);
+                pizzasList.appendChild(card);
+                updateChips(id);
+            }
+            document.getElementById('add-pizza').addEventListener('click', addPizza);
+            addPizza();
+            var modal = document.getElementById('flavor-modal');
+            var modalFlavors = document.getElementById('modal-flavors');
+            var currentPizzaId = null;
+            function renderModal(selected) {
+                modalFlavors.innerHTML = '';
+                for (var j = 0; j < flavorNames.length; j++) {
+                    var label = document.createElement('label');
+                    label.className = 'checkbox';
+                    var input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.value = flavorNames[j];
+                    if (selected.indexOf(flavorNames[j]) !== -1) input.checked = true;
+                    var span = document.createElement('span');
+                    span.textContent = flavorNames[j];
+                    label.appendChild(input);
+                    label.appendChild(span);
+                    modalFlavors.appendChild(label);
+                }
+                var inputs = modalFlavors.querySelectorAll('input[type="checkbox"]');
+                function enforceLimit(e) {
+                    var checked = modalFlavors.querySelectorAll('input[type="checkbox"]:checked');
+                    if (checked.length > 2) {
+                        e.target.checked = false;
+                        alert('Selecione no máximo 2 sabores.');
+                    }
+                }
+                for (var m = 0; m < inputs.length; m++) {
+                    inputs[m].addEventListener('change', enforceLimit);
+                }
+            }
+            function openFlavorModal(id) {
+                currentPizzaId = id;
+                var selected = pizzasState[id] && pizzasState[id].flavors ? pizzasState[id].flavors : [];
+                renderModal(selected);
+                modal.classList.remove('hidden');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+            document.getElementById('modal-cancel').addEventListener('click', function () {
+                modal.classList.add('hidden');
+                modal.setAttribute('aria-hidden', 'true');
+            });
+            document.getElementById('modal-save').addEventListener('click', function () {
+                var chosen = [];
+                var checked = modalFlavors.querySelectorAll('input[type="checkbox"]:checked');
+                for (var x = 0; x < checked.length; x++) {
+                    chosen.push(checked[x].value);
+                }
+                if (chosen.length === 0) {
+                    alert('Selecione pelo menos 1 sabor.');
+                    return;
+                }
+                if (chosen.length > 2) {
+                    alert('Selecione no máximo 2 sabores.');
+                    return;
+                }
+                pizzasState[currentPizzaId] = pizzasState[currentPizzaId] || {};
+                pizzasState[currentPizzaId].flavors = chosen;
+                updateChips(currentPizzaId);
+                modal.classList.add('hidden');
+                modal.setAttribute('aria-hidden', 'true');
+            });
+            var btnSend = document.getElementById('send-order');
+            btnSend.addEventListener('click', function () {
+                var cards = document.querySelectorAll('.pizza-card');
+                if (!cards.length) {
+                    alert('Adicione pelo menos uma pizza.');
+                    return;
+                }
+                var pizzasSummary = [];
+                for (var p = 0; p < cards.length; p++) {
+                    var id = cards[p].getAttribute('data-pizza-id');
+                    var sizeEl = cards[p].querySelector('input[name="size-' + id + '"]:checked');
+                    if (!sizeEl) {
+                        alert('Selecione o tamanho da ' + (p + 1) + 'ª pizza.');
+                        return;
+                    }
+                    var size = sizeEl.value;
+                    var flavors = pizzasState[id] && pizzasState[id].flavors ? pizzasState[id].flavors : [];
+                    if (flavors.length === 0) {
+                        alert('Selecione os sabores da ' + (p + 1) + 'ª pizza.');
+                        return;
+                    }
+                    if (flavors.length > 2) {
+                        alert('Selecione no máximo 2 sabores por pizza.');
+                        return;
+                    }
+                    var note = pizzasState[id] && pizzasState[id].note ? pizzasState[id].note.trim() : '';
+                    var line = 'Pizza ' + (p + 1) + ' — Tamanho: ' + size + ' — Sabores: ' + flavors.join(' + ');
+                    if (note) line += ' — Obs: ' + note;
+                    pizzasSummary.push(line);
+                }
+                var address = document.getElementById('address').value.trim();
+                if (!address) {
+                    alert('Informe o endereço de entrega.');
+                    return;
+                }
+                var phoneRaw = document.getElementById('phone').value;
+                var phoneDigits = phoneRaw.replace(/\D/g, '');
+                if (phoneDigits.length < 10) {
+                    alert('Informe um telefone válido.');
+                    return;
+                }
+                var message = 'Olá! Gostaria de fazer um pedido.%0A' +
+                    pizzasSummary.map(function (line) { return encodeURIComponent(line); }).join('%0A') + '%0A' +
+                    'Endereço: ' + encodeURIComponent(address) + '%0A' +
+                    'Telefone: ' + encodeURIComponent(phoneRaw);
+                var url = 'https://wa.me/5512991673437?text=' + message;
+                window.open(url, '_blank');
+            });
+        });
+    </script>
 </body>
 </html>
