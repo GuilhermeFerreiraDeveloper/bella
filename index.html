@@ -9,10 +9,17 @@
 </head>
 <body>
     <header>
-        <img src="logo.png" alt="Bella Pizza Logo" class="logo">
+        <div class="header-content">
+            <img src="logo.png" alt="Bella Pizza Logo" class="logo">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
     </header>
 
-    <nav id="tabs">
+    <nav id="tabs" class="nav-menu">
         <button class="tab-btn active" data-target="menu">Cardápio</button>
         <button class="tab-btn" data-target="order">Faça seu Pedido</button>
         <button class="tab-btn" data-target="contact">Contato</button>
@@ -179,12 +186,48 @@
     </footer>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Menu hambúrguer functionality
+            var menuToggle = document.getElementById('menu-toggle');
+            var navMenu = document.getElementById('tabs');
+            
+            function toggleMenu() {
+                navMenu.classList.toggle('active');
+                menuToggle.classList.toggle('active');
+            }
+            
+            function closeMenu() {
+                navMenu.classList.remove('active');
+                menuToggle.classList.remove('active');
+            }
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', toggleMenu);
+            }
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!navMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                    closeMenu();
+                }
+            });
+            
+            // Close menu when window is resized to desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    closeMenu();
+                }
+            });
+            
             var tabButtons = document.querySelectorAll('#tabs .tab-btn');
             var sectionIds = ['menu', 'order', 'contact', 'location'];
             function showSection(id) {
                 for (var s = 0; s < sectionIds.length; s++) {
                     var el = document.getElementById(sectionIds[s]);
                     if (el) el.style.display = sectionIds[s] === id ? '' : 'none';
+                }
+                // Close mobile menu after selection
+                if (window.innerWidth <= 768) {
+                    closeMenu();
                 }
             }
             function setActive(btn) {
