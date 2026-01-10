@@ -142,6 +142,7 @@
             <h2>Monte seu Pedido</h2>
             <form id="order-form">
                 <div id="pizzas-list"></div>
+                <div id="order-summary" class="order-summary"></div>
                 <div class="order-actions">
                     <button type="button" id="add-pizza" class="btn-secondary">Adicionar pizza</button>
                 </div>
@@ -171,8 +172,8 @@
         <section id="contact">
             <h2>Peça já a sua!</h2>
             <p>Massa fresquinha e ingredientes selecionados.</p>
-            <p>Telefone: <a href="tel:+5512991673437">(12) 99167-3437</a></p>
-            <p>WhatsApp: <a href="https://wa.me/5512991673437?text=Olá!%20Gostaria%20de%20fazer%20um%20pedido." target="_blank">(12) 99167-3437</a></p>
+            <p>Telefone: <a href="tel:+5512996829155">(12) 99682-9155</a></p>
+            <p>WhatsApp: <a href="https://wa.me/5512996829155?text=Olá!%20Gostaria%20de%20fazer%20um%20pedido." target="_blank">(12) 99682-9155</a></p>
         </section>
 
         <section id="location">
@@ -251,12 +252,38 @@
                 var n = flavorNodes[i].textContent.trim().replace(/:$/, '');
                 if (flavorNames.indexOf(n) === -1) flavorNames.push(n);
             }
+            function parsePrice(t) {
+                return parseFloat(String(t).replace(/\./g, '').replace(',', '.')) || 0;
+            }
+            function formatBRL(n) {
+                return 'R$ ' + (Number(n || 0).toFixed(2)).replace('.', ',');
+            }
+            var flavorPricing = {};
+            var categories = document.querySelectorAll('#menu .menu-category');
+            for (var k = 0; k < categories.length; k++) {
+                var h = categories[k].querySelector('h3');
+                if (!h) continue;
+                var txt = h.textContent;
+                var mP = txt.match(/P:\s*R\$\s*([\d.,]+)/);
+                var mG = txt.match(/G:\s*R\$\s*([\d.,]+)/);
+                var pVal = mP ? parsePrice(mP[1]) : 0;
+                var gVal = mG ? parsePrice(mG[1]) : 0;
+                var fs = categories[k].querySelectorAll('ul li strong');
+                for (var f = 0; f < fs.length; f++) {
+                    var name = fs[f].textContent.trim().replace(/:$/, '');
+                    flavorPricing[name] = { P: pVal, G: gVal };
+                }
+            }
             var pizzasState = {};
             var pizzaCounter = 0;
             function createPizzaCard(id) {
                 var card = document.createElement('div');
                 card.className = 'pizza-card';
                 card.setAttribute('data-pizza-id', id);
+                var title = document.createElement('div');
+                title.className = 'pizza-title';
+                title.textContent = 'Pizza';
+                card.appendChild(title);
                 var sizeGroup = document.createElement('div');
                 sizeGroup.className = 'form-group';
                 var lblSize = document.createElement('label');
@@ -270,6 +297,7 @@
                 r1.type = 'radio';
                 r1.name = 'size-' + id;
                 r1.value = 'P';
+                r1.checked = true;
                 var s1 = document.createElement('span');
                 s1.textContent = 'P';
                 l1.appendChild(r1); l1.appendChild(s1);
@@ -308,6 +336,8 @@
                     if (list.children.length > 1) {
                         delete pizzasState[id];
                         list.removeChild(card);
+                        relabelCards();
+                        updateSummary();
                     } else {
                         alert('Mantenha pelo menos uma pizza.');
                     }
@@ -331,10 +361,27 @@
                 noteInput.addEventListener('input', function (e) {
                     pizzasState[id] = pizzasState[id] || {};
                     pizzasState[id].note = e.target.value;
+                    updateSummary();
                 });
                 noteGroup.appendChild(lblNote);
                 noteGroup.appendChild(noteInput);
                 card.appendChild(noteGroup);
+                var priceRow = document.createElement('div');
+                priceRow.className = 'price-row';
+                priceRow.textContent = 'Preço: —';
+                card.appendChild(priceRow);
+                r1.addEventListener('change', function () {
+                    pizzasState[id] = pizzasState[id] || {};
+                    pizzasState[id].size = 'P';
+                    updatePrice(id);
+                    updateSummary();
+                });
+                r2.addEventListener('change', function () {
+                    pizzasState[id] = pizzasState[id] || {};
+                    pizzasState[id].size = 'G';
+                    updatePrice(id);
+                    updateSummary();
+                });
                 return card;
             }
             function updateChips(id) {
@@ -344,6 +391,8 @@
                 chips.innerHTML = '';
                 if (!selected.length) {
                     chips.textContent = 'Nenhum sabor selecionado';
+                    updatePrice(id);
+                    updateSummary();
                     return;
                 }
                 for (var c = 0; c < selected.length; c++) {
@@ -352,15 +401,67 @@
                     chip.textContent = selected[c];
                     chips.appendChild(chip);
                 }
+                updatePrice(id);
+                updateSummary();
             }
             var pizzasList = document.getElementById('pizzas-list');
+            function relabelCards() {
+                var cards = pizzasList.querySelectorAll('.pizza-card');
+                for (var idx = 0; idx < cards.length; idx++) {
+                    var t = cards[idx].querySelector('.pizza-title');
+                    if (t) t.textContent = 'Pizza ' + (idx + 1);
+                }
+            }
+            function updatePrice(id) {
+                var card = document.querySelector('.pizza-card[data-pizza-id="' + id + '"]');
+                if (!card) return;
+                var sizeEl = card.querySelector('input[name="size-' + id + '"]:checked');
+                var size = sizeEl ? sizeEl.value : (pizzasState[id] && pizzasState[id].size ? pizzasState[id].size : 'P');
+                var flavors = pizzasState[id] && pizzasState[id].flavors ? pizzasState[id].flavors.slice(0) : [];
+                var priceRow = card.querySelector('.price-row');
+                var price = 0;
+                if (flavors.length) {
+                    var vals = [];
+                    for (var q = 0; q < flavors.length; q++) {
+                        var fp = flavorPricing[flavors[q]];
+                        vals.push(fp && fp[size] ? fp[size] : 0);
+                    }
+                    price = vals.length ? Math.max.apply(null, vals) : 0;
+                }
+                pizzasState[id] = pizzasState[id] || {};
+                pizzasState[id].size = size;
+                pizzasState[id].price = price;
+                priceRow.textContent = price > 0 ? ('Preço: ' + formatBRL(price)) : 'Preço: —';
+            }
+            function updateSummary() {
+                var container = document.getElementById('order-summary');
+                var cards = pizzasList.querySelectorAll('.pizza-card');
+                var html = '';
+                var total = 0;
+                for (var p = 0; p < cards.length; p++) {
+                    var id = cards[p].getAttribute('data-pizza-id');
+                    var sizeEl = cards[p].querySelector('input[name="size-' + id + '"]:checked');
+                    var size = sizeEl ? sizeEl.value : (pizzasState[id] && pizzasState[id].size ? pizzasState[id].size : 'P');
+                    var flavors = pizzasState[id] && pizzasState[id].flavors ? pizzasState[id].flavors : [];
+                    var note = pizzasState[id] && pizzasState[id].note ? pizzasState[id].note.trim() : '';
+                    var price = pizzasState[id] && pizzasState[id].price ? pizzasState[id].price : 0;
+                    total += price || 0;
+                    var line = 'Pizza ' + (p + 1) + ' — Tamanho: ' + size + ' — Sabores: ' + (flavors.length ? flavors.join(' + ') : '—') + ' — Preço: ' + (price > 0 ? formatBRL(price) : '—');
+                    if (note) line += ' — Obs: ' + note;
+                    html += '<div class="order-line">' + line + '</div>';
+                }
+                html += '<div class="order-total">Total: ' + formatBRL(total) + '</div>';
+                container.innerHTML = html;
+            }
             function addPizza() {
                 pizzaCounter += 1;
                 var id = 'pizza-' + pizzaCounter;
-                pizzasState[id] = { flavors: [], note: '' };
+                pizzasState[id] = { flavors: [], note: '', size: 'P', price: 0 };
                 var card = createPizzaCard(id);
                 pizzasList.appendChild(card);
                 updateChips(id);
+                relabelCards();
+                updateSummary();
             }
             document.getElementById('add-pizza').addEventListener('click', addPizza);
             addPizza();
@@ -433,6 +534,7 @@
                     return;
                 }
                 var pizzasSummary = [];
+                var total = 0;
                 for (var p = 0; p < cards.length; p++) {
                     var id = cards[p].getAttribute('data-pizza-id');
                     var sizeEl = cards[p].querySelector('input[name="size-' + id + '"]:checked');
@@ -451,7 +553,14 @@
                         return;
                     }
                     var note = pizzasState[id] && pizzasState[id].note ? pizzasState[id].note.trim() : '';
-                    var line = 'Pizza ' + (p + 1) + ' — Tamanho: ' + size + ' — Sabores: ' + flavors.join(' + ');
+                    var vals = [];
+                    for (var t = 0; t < flavors.length; t++) {
+                        var pr = flavorPricing[flavors[t]];
+                        vals.push(pr && pr[size] ? pr[size] : 0);
+                    }
+                    var price = vals.length ? Math.max.apply(null, vals) : 0;
+                    total += price;
+                    var line = 'Pizza ' + (p + 1) + ' — Tamanho: ' + size + ' — Sabores: ' + flavors.join(' + ') + ' — Preço: ' + (price > 0 ? formatBRL(price) : '—');
                     if (note) line += ' — Obs: ' + note;
                     pizzasSummary.push(line);
                 }
@@ -468,9 +577,10 @@
                 }
                 var message = 'Olá! Gostaria de fazer um pedido.%0A' +
                     pizzasSummary.map(function (line) { return encodeURIComponent(line); }).join('%0A') + '%0A' +
+                    encodeURIComponent('Total: ' + formatBRL(total)) + '%0A' +
                     'Endereço: ' + encodeURIComponent(address) + '%0A' +
                     'Telefone: ' + encodeURIComponent(phoneRaw);
-                var url = 'https://wa.me/5512991673437?text=' + message;
+                var url = 'https://wa.me/5512996829155?text=' + message;
                 window.open(url, '_blank');
             });
         });

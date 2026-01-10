@@ -191,6 +191,19 @@ input[type="text"], input[type="tel"] {
     box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
 
+.pizza-title {
+    color: #ffc107;
+    font-weight: 700;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.price-row {
+    margin-top: 10px;
+    font-weight: 700;
+    color: #fff;
+}
+
 .chips {
     display: flex;
     flex-wrap: wrap;
@@ -319,6 +332,30 @@ input[type="text"], input[type="tel"] {
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
+.order-summary {
+    background-color: rgba(43, 43, 43, 0.9);
+    border: 1px solid #555;
+    border-radius: 10px;
+    padding: 16px;
+    margin: 10px 0 20px;
+}
+
+.order-line {
+    padding: 6px 0;
+    border-bottom: 1px dashed #555;
+    font-size: 1em;
+}
+
+.order-line:last-child {
+    border-bottom: none;
+}
+
+.order-total {
+    margin-top: 8px;
+    font-weight: 700;
+    color: #ffc107;
+}
+
 #order h2, #location h2 {
     color: #ffc107;
     font-family: 'Lobster', cursive;
@@ -435,7 +472,9 @@ footer {
     }
     
     .note-input {
-        width: 100%;
+        width: 92%;
+        margin: 0 auto;
+        display: block;
     }
 }
 
@@ -615,6 +654,9 @@ footer {
         padding: 14px;
         font-size: 1em;
         border-radius: 10px;
+        width: 92%;
+        margin: 0 auto;
+        display: block;
     }
     
     .note-input {
@@ -707,6 +749,13 @@ footer {
     
     #location iframe {
         height: 250px;
+    }
+    input[type="text"], input[type="tel"] {
+        width: 88%;
+    }
+
+    .note-input {
+        width: 88%;
     }
 }
 
