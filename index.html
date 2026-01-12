@@ -142,9 +142,11 @@
             <h2>Monte seu Pedido</h2>
             <form id="order-form">
                 <div id="pizzas-list"></div>
+                <div id="beverages-list"></div>
                 <div id="order-summary" class="order-summary"></div>
                 <div class="order-actions">
                     <button type="button" id="add-pizza" class="btn-secondary">Adicionar pizza</button>
+                    <button type="button" id="add-beverage" class="btn-secondary">Adicionar refrigerante</button>
                 </div>
                 <div class="form-group">
                     <label for="address" class="group-label">Endereço de Entrega</label>
@@ -165,6 +167,16 @@
                 <div class="modal-actions">
                     <button type="button" id="modal-save" class="btn-primary">Salvar</button>
                     <button type="button" id="modal-cancel" class="btn-secondary">Cancelar</button>
+                </div>
+            </div>
+        </div>
+        <div id="beverage-modal" class="modal hidden" aria-hidden="true">
+            <div class="modal-content">
+                <h3>Escolha o refrigerante</h3>
+                <div id="modal-beverages" class="flavors-grid"></div>
+                <div class="modal-actions">
+                    <button type="button" id="bev-modal-save" class="btn-primary">Salvar</button>
+                    <button type="button" id="bev-modal-cancel" class="btn-secondary">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -276,6 +288,10 @@
             }
             var pizzasState = {};
             var pizzaCounter = 0;
+            var beveragesList = document.getElementById('beverages-list');
+            var beveragesState = {};
+            var beverageCounter = 0;
+            var beverageUnitPrice = 15;
             function createPizzaCard(id) {
                 var card = document.createElement('div');
                 card.className = 'pizza-card';
@@ -412,6 +428,96 @@
                     if (t) t.textContent = 'Pizza ' + (idx + 1);
                 }
             }
+            function createBeverageCard(id) {
+                var card = document.createElement('div');
+                card.className = 'beverage-card pizza-card';
+                card.setAttribute('data-beverage-id', id);
+                var title = document.createElement('div');
+                title.className = 'pizza-title';
+                title.textContent = 'Refrigerante';
+                card.appendChild(title);
+                var typeGroup = document.createElement('div');
+                typeGroup.className = 'form-group';
+                var lblType = document.createElement('label');
+                lblType.className = 'group-label';
+                lblType.textContent = 'Tipo';
+                var chips = document.createElement('div');
+                chips.className = 'chips';
+                chips.textContent = 'Nenhum refrigerante selecionado';
+                var btnPick = document.createElement('button');
+                btnPick.type = 'button';
+                btnPick.className = 'btn-secondary';
+                btnPick.textContent = 'Escolher refrigerante';
+                btnPick.addEventListener('click', function () {
+                    openBeverageModal(id);
+                });
+                var btnRemove = document.createElement('button');
+                btnRemove.type = 'button';
+                btnRemove.className = 'btn-danger';
+                btnRemove.textContent = 'Remover refrigerante';
+                btnRemove.addEventListener('click', function () {
+                    if (beveragesList.children.length > 0) {
+                        delete beveragesState[id];
+                        beveragesList.removeChild(card);
+                        relabelBeverages();
+                        updateSummary();
+                    }
+                });
+                typeGroup.appendChild(lblType);
+                typeGroup.appendChild(chips);
+                typeGroup.appendChild(btnPick);
+                typeGroup.appendChild(btnRemove);
+                card.appendChild(typeGroup);
+                var priceRow = document.createElement('div');
+                priceRow.className = 'price-row';
+                priceRow.textContent = 'Preço: —';
+                card.appendChild(priceRow);
+                return card;
+            }
+            function relabelBeverages() {
+                var cards = beveragesList.querySelectorAll('.beverage-card');
+                for (var idx = 0; idx < cards.length; idx++) {
+                    var t = cards[idx].querySelector('.pizza-title');
+                    if (t) t.textContent = 'Refrigerante ' + (idx + 1);
+                }
+            }
+            function updateBeverageChips(id) {
+                var card = document.querySelector('.beverage-card[data-beverage-id="' + id + '"]');
+                if (!card) return;
+                var chips = card.querySelector('.chips');
+                var selected = beveragesState[id] && beveragesState[id].type ? beveragesState[id].type : '';
+                chips.innerHTML = '';
+                if (!selected) {
+                    chips.textContent = 'Nenhum refrigerante selecionado';
+                } else {
+                    var chip = document.createElement('span');
+                    chip.className = 'chip';
+                    chip.textContent = selected;
+                    chips.appendChild(chip);
+                }
+                updateBeveragePrice(id);
+                updateSummary();
+            }
+            function updateBeveragePrice(id) {
+                var card = document.querySelector('.beverage-card[data-beverage-id="' + id + '"]');
+                if (!card) return;
+                var priceRow = card.querySelector('.price-row');
+                var hasType = beveragesState[id] && beveragesState[id].type;
+                var price = hasType ? beverageUnitPrice : 0;
+                beveragesState[id] = beveragesState[id] || {};
+                beveragesState[id].price = price;
+                priceRow.textContent = price > 0 ? ('Preço: ' + formatBRL(price)) : 'Preço: —';
+            }
+            function addBeverage() {
+                beverageCounter += 1;
+                var id = 'beverage-' + beverageCounter;
+                beveragesState[id] = { type: '', price: 0 };
+                var card = createBeverageCard(id);
+                beveragesList.appendChild(card);
+                updateBeverageChips(id);
+                relabelBeverages();
+                updateSummary();
+            }
             function updatePrice(id) {
                 var card = document.querySelector('.pizza-card[data-pizza-id="' + id + '"]');
                 if (!card) return;
@@ -450,6 +556,15 @@
                     if (note) line += ' — Obs: ' + note;
                     html += '<div class="order-line">' + line + '</div>';
                 }
+                var bevCards = beveragesList.querySelectorAll('.beverage-card');
+                for (var b = 0; b < bevCards.length; b++) {
+                    var bid = bevCards[b].getAttribute('data-beverage-id');
+                    var btype = beveragesState[bid] && beveragesState[bid].type ? beveragesState[bid].type : '';
+                    var bprice = beveragesState[bid] && beveragesState[bid].price ? beveragesState[bid].price : 0;
+                    total += bprice || 0;
+                    var bline = 'Refrigerante ' + (b + 1) + ' — Tipo: ' + (btype || '—') + ' — Preço: ' + (bprice > 0 ? formatBRL(bprice) : '—');
+                    html += '<div class="order-line">' + bline + '</div>';
+                }
                 html += '<div class="order-total">Total: ' + formatBRL(total) + '</div>';
                 container.innerHTML = html;
             }
@@ -465,6 +580,10 @@
             }
             document.getElementById('add-pizza').addEventListener('click', addPizza);
             addPizza();
+            var btnAddBeverage = document.getElementById('add-beverage');
+            if (btnAddBeverage) {
+                btnAddBeverage.addEventListener('click', addBeverage);
+            }
             var modal = document.getElementById('flavor-modal');
             var modalFlavors = document.getElementById('modal-flavors');
             var currentPizzaId = null;
@@ -526,6 +645,50 @@
                 modal.classList.add('hidden');
                 modal.setAttribute('aria-hidden', 'true');
             });
+            var beverageModal = document.getElementById('beverage-modal');
+            var modalBeverages = document.getElementById('modal-beverages');
+            var currentBeverageId = null;
+            function renderBeverageModal(selected) {
+                modalBeverages.innerHTML = '';
+                var names = ['Guaraná', 'Coca-Cola'];
+                for (var j = 0; j < names.length; j++) {
+                    var label = document.createElement('label');
+                    label.className = 'checkbox';
+                    var input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = 'bev-choice';
+                    input.value = names[j];
+                    if (selected === names[j]) input.checked = true;
+                    var span = document.createElement('span');
+                    span.textContent = names[j];
+                    label.appendChild(input);
+                    label.appendChild(span);
+                    modalBeverages.appendChild(label);
+                }
+            }
+            function openBeverageModal(id) {
+                currentBeverageId = id;
+                var selected = beveragesState[id] && beveragesState[id].type ? beveragesState[id].type : '';
+                renderBeverageModal(selected);
+                beverageModal.classList.remove('hidden');
+                beverageModal.setAttribute('aria-hidden', 'false');
+            }
+            document.getElementById('bev-modal-cancel').addEventListener('click', function () {
+                beverageModal.classList.add('hidden');
+                beverageModal.setAttribute('aria-hidden', 'true');
+            });
+            document.getElementById('bev-modal-save').addEventListener('click', function () {
+                var checked = modalBeverages.querySelector('input[type="radio"]:checked');
+                if (!checked) {
+                    alert('Selecione um refrigerante.');
+                    return;
+                }
+                beveragesState[currentBeverageId] = beveragesState[currentBeverageId] || {};
+                beveragesState[currentBeverageId].type = checked.value;
+                updateBeverageChips(currentBeverageId);
+                beverageModal.classList.add('hidden');
+                beverageModal.setAttribute('aria-hidden', 'true');
+            });
             var btnSend = document.getElementById('send-order');
             btnSend.addEventListener('click', function () {
                 var cards = document.querySelectorAll('.pizza-card');
@@ -534,6 +697,7 @@
                     return;
                 }
                 var pizzasSummary = [];
+                var beveragesSummary = [];
                 var total = 0;
                 for (var p = 0; p < cards.length; p++) {
                     var id = cards[p].getAttribute('data-pizza-id');
@@ -564,6 +728,19 @@
                     if (note) line += ' — Obs: ' + note;
                     pizzasSummary.push(line);
                 }
+                var bevCardsSend = document.querySelectorAll('.beverage-card');
+                for (var b = 0; b < bevCardsSend.length; b++) {
+                    var bid = bevCardsSend[b].getAttribute('data-beverage-id');
+                    var btype = beveragesState[bid] && beveragesState[bid].type ? beveragesState[bid].type : '';
+                    if (!btype) {
+                        alert('Selecione o tipo do refrigerante ' + (b + 1) + '.');
+                        return;
+                    }
+                    var bprice = beverageUnitPrice;
+                    total += bprice;
+                    var bline = 'Refrigerante ' + (b + 1) + ' — Tipo: ' + btype + ' — Preço: ' + formatBRL(bprice);
+                    beveragesSummary.push(bline);
+                }
                 var address = document.getElementById('address').value.trim();
                 if (!address) {
                     alert('Informe o endereço de entrega.');
@@ -575,8 +752,9 @@
                     alert('Informe um telefone válido.');
                     return;
                 }
+                var allLines = pizzasSummary.concat(beveragesSummary);
                 var message = 'Olá! Gostaria de fazer um pedido.%0A' +
-                    pizzasSummary.map(function (line) { return encodeURIComponent(line); }).join('%0A') + '%0A' +
+                    allLines.map(function (line) { return encodeURIComponent(line); }).join('%0A') + '%0A' +
                     encodeURIComponent('Total: ' + formatBRL(total)) + '%0A' +
                     'Endereço: ' + encodeURIComponent(address) + '%0A' +
                     'Telefone: ' + encodeURIComponent(phoneRaw);
@@ -585,5 +763,15 @@
             });
         });
     </script>
+
+<!--
+   _____      _    _      _
+  / ____|    | |  | |    (_)
+ | |  __     | |  | |    | |
+ | | |_ |    | |  | |    | |
+ | |__| |    | |__| |    | |
+  \_____|     \____/     |_|
+-->
+
 </body>
 </html>

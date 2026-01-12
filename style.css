@@ -178,7 +178,10 @@ input[type="text"], input[type="tel"] {
 
 .order-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
     margin: 10px 0 20px;
 }
 
@@ -646,7 +649,9 @@ footer {
     }
     
     .order-actions {
-        justify-content: center;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
         margin: 15px 0 20px;
     }
     
