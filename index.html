@@ -691,7 +691,7 @@
             });
             var btnSend = document.getElementById('send-order');
             btnSend.addEventListener('click', function () {
-                var cards = document.querySelectorAll('.pizza-card');
+                var cards = pizzasList.querySelectorAll('.pizza-card');
                 if (!cards.length) {
                     alert('Adicione pelo menos uma pizza.');
                     return;
