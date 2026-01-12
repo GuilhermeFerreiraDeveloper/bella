@@ -729,17 +729,22 @@
                     pizzasSummary.push(line);
                 }
                 var bevCardsSend = document.querySelectorAll('.beverage-card');
+                var bevCounts = { 'Guaraná': 0, 'Coca-Cola': 0 };
                 for (var b = 0; b < bevCardsSend.length; b++) {
                     var bid = bevCardsSend[b].getAttribute('data-beverage-id');
                     var btype = beveragesState[bid] && beveragesState[bid].type ? beveragesState[bid].type : '';
                     if (!btype) {
-                        alert('Selecione o tipo do refrigerante ' + (b + 1) + '.');
+                        alert('Selecione o tipo do refrigerante.');
                         return;
                     }
-                    var bprice = beverageUnitPrice;
-                    total += bprice;
-                    var bline = 'Refrigerante ' + (b + 1) + ' — Tipo: ' + btype + ' — Preço: ' + formatBRL(bprice);
-                    beveragesSummary.push(bline);
+                    total += beverageUnitPrice;
+                    if (bevCounts.hasOwnProperty(btype)) bevCounts[btype] += 1;
+                }
+                if (bevCounts['Coca-Cola'] > 0) {
+                    beveragesSummary.push('Coca-Cola x ' + bevCounts['Coca-Cola'] + ' — Preço: ' + formatBRL(bevCounts['Coca-Cola'] * beverageUnitPrice));
+                }
+                if (bevCounts['Guaraná'] > 0) {
+                    beveragesSummary.push('Guaraná x ' + bevCounts['Guaraná'] + ' — Preço: ' + formatBRL(bevCounts['Guaraná'] * beverageUnitPrice));
                 }
                 var address = document.getElementById('address').value.trim();
                 if (!address) {
@@ -752,12 +757,28 @@
                     alert('Informe um telefone válido.');
                     return;
                 }
-                var allLines = pizzasSummary.concat(beveragesSummary);
-                var message = 'Olá! Gostaria de fazer um pedido.%0A' +
-                    allLines.map(function (line) { return encodeURIComponent(line); }).join('%0A') + '%0A' +
-                    encodeURIComponent('Total: ' + formatBRL(total)) + '%0A' +
-                    'Endereço: ' + encodeURIComponent(address) + '%0A' +
-                    'Telefone: ' + encodeURIComponent(phoneRaw);
+                var messageLines = [];
+                messageLines.push('Resumo do Pedido');
+                messageLines.push('--- PIZZAS ---');
+                for (var ps = 0; ps < pizzasSummary.length; ps++) {
+                    messageLines.push(pizzasSummary[ps]);
+                }
+                messageLines.push('');
+                messageLines.push('--- REFRIGERANTES ---');
+                if (beveragesSummary.length) {
+                    for (var bs = 0; bs < beveragesSummary.length; bs++) {
+                        messageLines.push('- ' + beveragesSummary[bs]);
+                    }
+                } else {
+                    messageLines.push('Nenhum');
+                }
+                messageLines.push('');
+                messageLines.push('--- TOTAL ---');
+                messageLines.push(formatBRL(total));
+                messageLines.push('');
+                messageLines.push('Endereço: ' + address);
+                messageLines.push('Telefone: ' + phoneRaw);
+                var message = messageLines.map(function (line) { return encodeURIComponent(line); }).join('%0A');
                 var url = 'https://wa.me/5512996829155?text=' + message;
                 window.open(url, '_blank');
             });
