@@ -95,7 +95,7 @@
                         <strong>Portuguesa:</strong> molho de tomate, apresuntado, ervilha, ovo cozido, palmito, mussarela, cebola, azeitona e orégano.
                     </li>
                     <li>
-                        <strong>Toscana:</strong> (Ingredientes não especificados).
+                        <strong>Toscana:</strong> mussarela, calabresa moída, requeijão, ovo e bacon.
                     </li>
                 </ul>
             </div>
@@ -155,6 +155,54 @@
                 <div class="form-group">
                     <label for="phone" class="group-label">Telefone de contato</label>
                     <input id="phone" type="tel" placeholder="(DDD) 9XXXX-XXXX" required>
+                </div>
+                <div class="form-group">
+                    <label class="group-label">Total do Pedido</label>
+                    <div id="inline-total" class="order-total">Total: R$ 0,00</div>
+                </div>
+                <div class="form-group">
+                    <label class="group-label">Retirada ou Entrega</label>
+                    <div class="size-options">
+                        <label class="radio">
+                            <input type="radio" name="order-mode" id="mode-pickup" value="pickup">
+                            <span>Retirada</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="order-mode" id="mode-delivery" value="delivery" checked>
+                            <span>Entrega</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group" id="payment-group">
+                    <label class="group-label">Forma de pagamento</label>
+                    <div class="size-options">
+                        <label class="radio">
+                            <input type="radio" name="payment-method" value="card">
+                            <span>Cartão crédito/débito</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="payment-method" value="pix">
+                            <span>Pix</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="payment-method" value="cash">
+                            <span>Dinheiro</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group" id="change-group" style="display:none;">
+                    <label class="group-label">Precisa de troco?</label>
+                    <div class="size-options">
+                        <label class="radio">
+                            <input type="radio" name="need-change" value="no" checked>
+                            <span>Não</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="need-change" value="yes">
+                            <span>Sim</span>
+                        </label>
+                    </div>
+                    <input id="change-amount" type="text" placeholder="Troco para R$" style="display:none;">
                 </div>
                 <button type="button" id="send-order" class="btn-primary">Enviar Pedido</button>
             </form>
@@ -292,6 +340,7 @@
             var beveragesState = {};
             var beverageCounter = 0;
             var beverageUnitPrice = 15;
+            var orderState = { mode: 'delivery', payment: '', changeNeeded: 'no', changeAmount: '' };
             function createPizzaCard(id) {
                 var card = document.createElement('div');
                 card.className = 'pizza-card';
@@ -567,6 +616,8 @@
                 }
                 html += '<div class="order-total">Total: ' + formatBRL(total) + '</div>';
                 container.innerHTML = html;
+                var inlineTotal = document.getElementById('inline-total');
+                if (inlineTotal) inlineTotal.textContent = 'Total: ' + formatBRL(total);
             }
             function addPizza() {
                 pizzaCounter += 1;
@@ -583,6 +634,58 @@
             var btnAddBeverage = document.getElementById('add-beverage');
             if (btnAddBeverage) {
                 btnAddBeverage.addEventListener('click', addBeverage);
+            }
+            var modeInputs = document.querySelectorAll('input[name="order-mode"]');
+            for (var mm = 0; mm < modeInputs.length; mm++) {
+                modeInputs[mm].addEventListener('change', function (e) {
+                    orderState.mode = e.target.value;
+                    var paymentGroup = document.getElementById('payment-group');
+                    var changeGroup = document.getElementById('change-group');
+                    var addressEl = document.getElementById('address');
+                    if (orderState.mode === 'delivery') {
+                        if (paymentGroup) paymentGroup.style.display = '';
+                        if (changeGroup) changeGroup.style.display = orderState.payment === 'cash' ? '' : 'none';
+                        if (addressEl) addressEl.required = true;
+                    } else {
+                        if (paymentGroup) paymentGroup.style.display = 'none';
+                        if (changeGroup) changeGroup.style.display = 'none';
+                        if (addressEl) addressEl.required = false;
+                    }
+                });
+            }
+            var payInputs = document.querySelectorAll('input[name="payment-method"]');
+            for (var pm = 0; pm < payInputs.length; pm++) {
+                payInputs[pm].addEventListener('change', function (e) {
+                    orderState.payment = e.target.value;
+                    var changeGroup = document.getElementById('change-group');
+                    if (orderState.payment === 'cash' && orderState.mode === 'delivery') {
+                        changeGroup.style.display = '';
+                    } else {
+                        changeGroup.style.display = 'none';
+                    }
+                });
+            }
+            var changeInputs = document.querySelectorAll('input[name="need-change"]');
+            for (var nc = 0; nc < changeInputs.length; nc++) {
+                changeInputs[nc].addEventListener('change', function (e) {
+                    orderState.changeNeeded = e.target.value;
+                    var amt = document.getElementById('change-amount');
+                    if (orderState.changeNeeded === 'yes') {
+                        amt.style.display = '';
+                        amt.required = true;
+                    } else {
+                        amt.style.display = 'none';
+                        amt.required = false;
+                        amt.value = '';
+                        orderState.changeAmount = '';
+                    }
+                });
+            }
+            var changeAmtEl = document.getElementById('change-amount');
+            if (changeAmtEl) {
+                changeAmtEl.addEventListener('input', function (e) {
+                    orderState.changeAmount = e.target.value;
+                });
             }
             var modal = document.getElementById('flavor-modal');
             var modalFlavors = document.getElementById('modal-flavors');
@@ -728,6 +831,24 @@
                     if (note) line += ' — Obs: ' + note;
                     pizzasSummary.push(line);
                 }
+                if (orderState.mode === 'delivery') {
+                    if (!orderState.payment) {
+                        alert('Selecione a forma de pagamento.');
+                        return;
+                    }
+                    if (orderState.payment === 'cash' && document.querySelector('input[name="need-change"]:checked').value === 'yes') {
+                        var amtStr = document.getElementById('change-amount').value.trim();
+                        if (!amtStr) {
+                            alert('Informe o valor para troco.');
+                            return;
+                        }
+                        orderState.changeNeeded = 'yes';
+                        orderState.changeAmount = amtStr;
+                    } else {
+                        orderState.changeNeeded = 'no';
+                        orderState.changeAmount = '';
+                    }
+                }
                 var bevCardsSend = document.querySelectorAll('.beverage-card');
                 var bevCounts = { 'Guaraná': 0, 'Coca-Cola': 0 };
                 for (var b = 0; b < bevCardsSend.length; b++) {
@@ -747,9 +868,11 @@
                     beveragesSummary.push('Guaraná x ' + bevCounts['Guaraná'] + ' — Preço: ' + formatBRL(bevCounts['Guaraná'] * beverageUnitPrice));
                 }
                 var address = document.getElementById('address').value.trim();
-                if (!address) {
-                    alert('Informe o endereço de entrega.');
-                    return;
+                if (orderState.mode === 'delivery') {
+                    if (!address) {
+                        alert('Informe o endereço de entrega.');
+                        return;
+                    }
                 }
                 var phoneRaw = document.getElementById('phone').value;
                 var phoneDigits = phoneRaw.replace(/\D/g, '');
@@ -773,10 +896,28 @@
                     messageLines.push('Nenhum');
                 }
                 messageLines.push('');
+                messageLines.push('--- ENTREGA/RETIRADA ---');
+                if (orderState.mode === 'delivery') {
+                    messageLines.push('Entrega');
+                    var pmLabel = orderState.payment === 'card' ? 'Cartão crédito/débito' : (orderState.payment === 'pix' ? 'Pix' : 'Dinheiro');
+                    messageLines.push('Pagamento: ' + pmLabel);
+                    if (orderState.payment === 'cash') {
+                        var needLabel = orderState.changeNeeded === 'yes' ? 'Sim' : 'Não';
+                        messageLines.push('Precisa de troco: ' + needLabel);
+                        if (orderState.changeNeeded === 'yes') {
+                            messageLines.push('Troco para: ' + orderState.changeAmount);
+                        }
+                    }
+                } else {
+                    messageLines.push('Retirada');
+                }
+                messageLines.push('');
                 messageLines.push('--- TOTAL ---');
                 messageLines.push(formatBRL(total));
                 messageLines.push('');
-                messageLines.push('Endereço: ' + address);
+                if (orderState.mode === 'delivery') {
+                    messageLines.push('Endereço: ' + address);
+                }
                 messageLines.push('Telefone: ' + phoneRaw);
                 var message = messageLines.map(function (line) { return encodeURIComponent(line); }).join('%0A');
                 var url = 'https://wa.me/5512996829155?text=' + message;
