@@ -126,6 +126,12 @@ input[type="text"], input[type="tel"] {
     border-radius: 8px;
     outline: none;
 }
+/* Troco (campo específico) */
+#change-amount {
+    width: 240px;
+    max-width: 70%;
+    margin-top: 10px;
+}
 
 .note-input {
     width: 70%;
@@ -663,6 +669,10 @@ footer {
         margin: 0 auto;
         display: block;
     }
+    #change-amount {
+        width: 75%;
+        margin-top: 12px;
+    }
     
     .note-input {
         width: 100%;
@@ -761,6 +771,10 @@ footer {
 
     .note-input {
         width: 88%;
+    }
+    #change-amount {
+        width: 80%;
+        margin-top: 14px;
     }
 }
 
