@@ -913,6 +913,10 @@
                 }
                 messageLines.push('');
                 messageLines.push('--- TOTAL ---');
+                if (orderState.mode === 'delivery') {
+                    total += 5;
+                    messageLines.push('Taxa de entrega: ' + formatBRL(5));
+                }
                 messageLines.push(formatBRL(total));
                 messageLines.push('');
                 if (orderState.mode === 'delivery') {
