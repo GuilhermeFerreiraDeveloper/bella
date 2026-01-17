@@ -149,10 +149,6 @@
                     <button type="button" id="add-beverage" class="btn-secondary">Adicionar refrigerante</button>
                 </div>
                 <div class="form-group">
-                    <label for="address" class="group-label">Endereço de Entrega</label>
-                    <input id="address" type="text" placeholder="Rua, número, bairro" required>
-                </div>
-                <div class="form-group">
                     <label for="phone" class="group-label">Telefone de contato</label>
                     <input id="phone" type="tel" placeholder="(DDD) 9XXXX-XXXX" required>
                 </div>
@@ -172,6 +168,10 @@
                             <span>Entrega</span>
                         </label>
                     </div>
+                </div>
+                <div class="form-group" id="address-group">
+                    <label for="address" class="group-label">Endereço de Entrega</label>
+                    <input id="address" type="text" placeholder="Rua, número, bairro">
                 </div>
                 <div class="form-group" id="payment-group">
                     <label class="group-label">Forma de pagamento</label>
@@ -641,14 +641,17 @@
                     orderState.mode = e.target.value;
                     var paymentGroup = document.getElementById('payment-group');
                     var changeGroup = document.getElementById('change-group');
+                    var addressGroup = document.getElementById('address-group');
                     var addressEl = document.getElementById('address');
                     if (orderState.mode === 'delivery') {
                         if (paymentGroup) paymentGroup.style.display = '';
                         if (changeGroup) changeGroup.style.display = orderState.payment === 'cash' ? '' : 'none';
+                        if (addressGroup) addressGroup.style.display = '';
                         if (addressEl) addressEl.required = true;
                     } else {
                         if (paymentGroup) paymentGroup.style.display = 'none';
                         if (changeGroup) changeGroup.style.display = 'none';
+                        if (addressGroup) addressGroup.style.display = 'none';
                         if (addressEl) addressEl.required = false;
                     }
                 });
